@@ -1,21 +1,45 @@
+/* eslint-disable @typescript-eslint/no-this-alias */
 import bcrypt from 'bcrypt';
 import { Schema, model } from 'mongoose';
 import config from '../../config';
 import { TUser, UserModel } from './user.interface';
+
 const userSchema = new Schema<TUser, UserModel>(
   {
+    name: {
+      type: String,
+      required: true,
+    },
+    username: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
-      required: [true, 'Email is required!'],
+      required: true,
       unique: true,
     },
     password: {
       type: String,
-      required: [true, 'Password is required!'],
+      required: true,
+      select: 0,
     },
-    name: {
+    profileImage: {
       type: String,
-      required: [true, 'Name is required!'],
+    },
+    bio: {
+      type: String,
+    },
+    followersCount: {
+      type: Number,
+      default: 0,
+    },
+    settings: {
+      type: Schema.Types.Mixed,
+    },
+    isBanned: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -24,10 +48,10 @@ const userSchema = new Schema<TUser, UserModel>(
 );
 
 userSchema.pre('save', async function (next) {
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const user = this;
   // hashing password and save into DB
-  this.password = await bcrypt.hash(
-    this.password,
+  user.password = await bcrypt.hash(
+    user.password,
     Number(config.bcrypt_salt_rounds),
   );
   next();
@@ -38,8 +62,9 @@ userSchema.post('save', function (doc, next) {
   doc.password = '';
   next();
 });
-userSchema.statics.isUserExists = async function (field: Record<string, unknown>) {  
-  return await User.findOne(field).select('+password');
+
+userSchema.statics.isUserExists = async function (id: string) {
+  return await User.findById(id).select('+password');
 };
 
 userSchema.statics.isPasswordMatched = async function (
