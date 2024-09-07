@@ -10,6 +10,7 @@ export interface TUser {
   profileImage: string;
   bio: string;
   followersCount: number;
+  followingCount: number;
   isBanned: boolean;
   settings: object;
 }

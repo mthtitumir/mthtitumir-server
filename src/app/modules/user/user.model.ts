@@ -13,6 +13,7 @@ const userSchema = new Schema<TUser, UserModel>(
     username: {
       type: String,
       required: true,
+      unique: true,
     },
     email: {
       type: String,
@@ -31,6 +32,10 @@ const userSchema = new Schema<TUser, UserModel>(
       type: String,
     },
     followersCount: {
+      type: Number,
+      default: 0,
+    },
+    followingCount: {
       type: Number,
       default: 0,
     },
